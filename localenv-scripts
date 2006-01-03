@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+#  localenv-scripts
+#
+#  Run scripts in /dir/[profile]/ some the correct order.
+#
+#
+
+function usage() {
+	echo "Usage: $0 PROFILE PATH"
+	echo "Run scripts in [path]/[profile]/scripts/ in the correct order."
+	echo
+	echo "Options:"
+	echo "  None"
+	echo
+}
+
+function msg() {
+	if [ "$FLAG_VERBOSE" ]; then
+		echo $*
+	fi
+}
+
+function handle_cmdline() {
+	TEMP=`getopt -o hdp: --long dry-run,profile,help -n 'localenv-scripts' -- "$@"`
+
+	if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+	eval set -- "$TEMP"
+
+	while true ; do
+		case "$1" in
+			-d|--dry-run)  DRY_RUN=1;      shift 1;;
+			-p|--profile)  PROFILE=$2;     shift 2 ;;
+			-h|--help)     FLAG_HELP=1;    shift 1 ;;
+			--)                            shift 1; break ;;
+			*)             echo "Internal error!" ; exit 1 ;;
+		esac
+	done
+
+	if [ $# -ne 2 ]; then
+		FLAG_HELP=1
+	fi
+
+	if [ "$FLAG_HELP" ]; then
+		usage
+		exit
+	fi
+
+	PROFILE=$1
+	SCR_PATH=$2
+
+	if [ ! "$PROFILE" ]; then
+		usage
+		exit
+	fi
+
+	if [ ! -d "$SCR_PATH/$PROFILE/scripts/" ]; then
+		echo "No scripts found for profile '$PROFILE' in $SCR_PATH/$PROFILE/scripts/" >&2
+		exit
+	fi
+}
+
+handle_cmdline $*
+
+for SCRIPT in `ls "$SCR_PATH/$PROFILE/scripts/" | sort -n`; do
+	RSCRIPT="$SCR_PATH/$PROFILE/scripts/$SCRIPT"
+	if [ -x $RSCRIPT -a -f $RSCRIPT ]; then
+		if [ "$DRY_RUN" ]; then
+			echo $RSCRIPT
+		else
+			$RSCRIPT
+		fi
+	fi
+done

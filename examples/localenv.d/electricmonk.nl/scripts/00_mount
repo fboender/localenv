@@ -1,0 +1,4 @@
+#!/bin/sh
+
+mount -t nfs sharky:/storage /storage
+mount -t smbfs -o username=fboender //fileserver/mp3 /mp3

@@ -1,0 +1,93 @@
+#!/bin/sh
+#
+#  localenv-discover
+#
+#  do a bunch of stuff to try to discover on which network we are.  Echo the
+#  resulting profile name or put it in /etc/localenv.d/current_env or set an
+#  environment variable.
+#
+#
+
+function usage() {
+	echo "Usage: $0 -cFILE"
+	echo "Try to discover on what network or environment we're currently running. It"
+	echo "outputs the findings (the profile name) on stdout"
+	echo
+	echo "Options:"
+    echo "  -c, --config CONFIG   Configuration file to use."
+	echo
+}
+
+function msg() {
+	if [ "$FLAG_VERBOSE" ]; then
+		echo $*
+	fi
+}
+
+function handle_cmdline() {
+	TEMP=`getopt -o hc: --long config:,help -n 'localenv-discover' -- "$@"`
+
+	if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+	eval set -- "$TEMP"
+
+	while true ; do
+		case "$1" in
+			-c|--config)   CONFIG=$2;      shift 2 ;;
+			-h|--help)     FLAG_HELP=1;    shift 1 ;;
+			--)                            shift 1; break ;;
+			*)             echo "Internal error!" ; exit 1 ;;
+		esac
+	done
+
+	if [ "$FLAG_HELP" ]; then
+		usage
+		exit
+	fi
+}
+
+function get_config() {
+	# Find configuration file
+	if [ "$CONFIG" ]; then
+		if [ -r "$CONFIG" ]; then
+			msg "Using config '$CONFIG'."
+			echo "$CONFIG"
+		else
+			echo "Couldn't read config '$CONFIG'. Aborting." >&2
+			exit
+		fi
+	elif [ -r "./localenv.conf" ]; then 
+		msg "Using config './backup.conf'."
+		echo "./localenv.conf"
+	elif [ -r "/etc/localenv.d/localenv.conf" ]; then 
+		msg "Using config '/etc/localevn.d/localenv.conf'."
+		echo "/etc/localenv.d/localenv.conf"
+	elif [ -r "/etc/localenv.conf" ]; then
+		msg "Using config '/etc/localenv.conf'."
+		echo "/etc/localenv.conf"
+	else 
+		echo "No usable configuration found. Aborting.." >&2
+		exit
+	fi
+}
+
+handle_cmdline $*
+CONFIG=`get_config`
+
+PROFILE=$(
+cat $CONFIG | grep -v "#" | grep -vx "" | while read PROFILE_NAME IP_ADDR MAC_ADDR; do
+	# Find the MAC address by pinging the host and then checking the ARP table.
+	ping -c1 $IP_ADDR >/dev/null
+	M=`/usr/sbin/arp -a -n | grep "($IP_ADDR)" | cut -d" " -f4`
+
+	if [ "$MAC_ADDR" == "$M" ]; then
+		echo $PROFILE_NAME
+	fi
+done
+)
+
+if [ ! "$PROFILE" ]; then
+	PROFILE="unknown"
+fi
+
+echo $PROFILE 

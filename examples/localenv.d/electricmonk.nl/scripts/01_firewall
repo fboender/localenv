@@ -1,0 +1,16 @@
+#!/bin/sh
+
+iptables -F INPUT
+iptables -F OUTPUT
+
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+
+# SSH Tunnel protection
+iptables -A INPUT -i eth0 -p tcp --destination-port 110 -j REJECT
+iptables -A INPUT -i eth0 -p udp --destination-port 110 -j REJECT
+iptables -A INPUT -i eth0 -p tcp --destination-port 119 -j REJECT
+iptables -A INPUT -i eth0 -p udp --destination-port 119 -j REJECT
+iptables -A INPUT -i eth0 -p tcp --destination-port 631 -j REJECT
+iptables -A INPUT -i eth0 -p udp --destination-port 631 -j REJECT
+
