@@ -1,15 +1,15 @@
 localenv
 
-	Bunch-o-scripts that run other scripts or replace/append configuration
-	files depending on the network you're on.
+    Bunch-o-scripts for Linux that run other scripts or replace/append
+    configuration files depending on the network you're on.
 
 
 How does it work?
 
 	localenv-init.d
 
-		init.d script that runs the scripts and configs in /etc/localenv.d/
-		upon system boot.
+        init.d script that runs the scripts and configs in /etc/localenv.d/
+        upon system boot.
 
 	localenv-discover
 
@@ -70,8 +70,8 @@ Configuration
     localenv-confs
 
         localenv-confs configuration files are normal configuration files but
-        with a special header which will be parsed by localenv-confs. The 
-        files should look like this:
+        with a special header which will be parsed by localenv-confs. The files
+        should look like this:
 
 		dest=/path/to/conf/to/replace
 		mode=overwrite (or) mode=append
