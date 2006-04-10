@@ -20,7 +20,7 @@ How does it work?
         below on how to figure out the MAC addresses of machines on your
         network.
 
-	localenv-script
+	localenv-scripts
 
 		Runs scripts in a directory [path]/[profile]/scripts/ in the correct 
 		order. See the examples/localenv.d/[profile]/scripts/ directory.

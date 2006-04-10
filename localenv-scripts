@@ -11,18 +11,25 @@ function usage() {
 	echo "Run scripts in [path]/[profile]/scripts/ in the correct order."
 	echo
 	echo "Options:"
-	echo "  None"
+    echo "  -d, --dry-run           Do not actually run any scripts."
+    echo "  -p, --profile PROFILE   Profile to use."
+    echo "  -v, --verbose           Lots of output."
+    echo "  -h, --help              This help message."
 	echo
+    echo "  PROFILE"
+    echo "    The name of the profile to use. This must correspond with the"
+    echo "    name of a directory in PATH."
+    echo
 }
 
 function msg() {
-	if [ "$FLAG_VERBOSE" ]; then
+	if [ "$VERBOSE" ]; then
 		echo $*
 	fi
 }
 
 function handle_cmdline() {
-	TEMP=`getopt -o hdp: --long dry-run,profile,help -n 'localenv-scripts' -- "$@"`
+	TEMP=`getopt -o hdvp: --long dry-run,profile,verbose,help -n 'localenv-scripts' -- "$@"`
 
 	if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -31,8 +38,9 @@ function handle_cmdline() {
 	while true ; do
 		case "$1" in
 			-d|--dry-run)  DRY_RUN=1;      shift 1;;
-			-p|--profile)  PROFILE=$2;     shift 2 ;;
-			-h|--help)     FLAG_HELP=1;    shift 1 ;;
+			-p|--profile)  PROFILE=$2;     shift 2;;
+			-v|--verbose)  VERBOSE=1;      shift 1;;
+			-h|--help)     FLAG_HELP=1;    shift 1;;
 			--)                            shift 1; break ;;
 			*)             echo "Internal error!" ; exit 1 ;;
 		esac
@@ -55,6 +63,8 @@ function handle_cmdline() {
 		exit
 	fi
 
+    msg "Using profile $PROFILE."
+
 	if [ ! -d "$SCR_PATH/$PROFILE/scripts/" ]; then
 		echo "No scripts found for profile '$PROFILE' in $SCR_PATH/$PROFILE/scripts/" >&2
 		exit
@@ -63,13 +73,17 @@ function handle_cmdline() {
 
 handle_cmdline $*
 
+msg "Searching for scripts in $SCR_PATH/$PROFILE/scripts/"
+
 for SCRIPT in `ls "$SCR_PATH/$PROFILE/scripts/" | sort -n`; do
 	RSCRIPT="$SCR_PATH/$PROFILE/scripts/$SCRIPT"
 	if [ -x $RSCRIPT -a -f $RSCRIPT ]; then
 		if [ "$DRY_RUN" ]; then
-			echo $RSCRIPT
+			echo "Would have run $RSCRIPT"
 		else
+            msg -n "Running $RSCRIPT. "
 			$RSCRIPT
+            msg "Exit status: $?"
 		fi
 	fi
 done

@@ -1,11 +1,19 @@
 #!/bin/sh
 
-cp -a localenv-conf /usr/bin/
-cp -a localenv-discover /usr/bin/
-cp -a localenv-scripts /usr/bin/
-cp -ar localenv.d-skel /etc/localenv.d 
+echo "Installing binaries to /usr/bin/"
+cp -v -a localenv-confs /usr/bin/
+cp -v -a localenv-discover /usr/bin/
+cp -v -a localenv-scripts /usr/bin/
 
-chown -R root:root /usr/bin/localenv-conf
+if [ -e "/etc/localenv.d" ]; then
+    echo "You already have a localenv.d in /etc/. I won't copy the skeleton."
+else 
+    echo "bow"
+    cp -v -ar localenv.d-skel /etc/localenv.d 
+fi
+
+echo "Setting ownership and permissions on files"
+chown -R root:root /usr/bin/localenv-confs
 chown -R root:root /usr/bin/localenv-discover
 chown -R root:root /usr/bin/localenv-scripts
 chown -R root:root /etc/localenv.d 
