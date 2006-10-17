@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+#  localenv-script-wrapper
+#
+#  Run script after defining some default functions and
+#  handy thingies.
+#
+
+function is_running() {
+    PROGRAM="$1"
+
+    RUNNING=$(ps ax | cut -d":" -f2- | cut -d" " -f2- | grep "^$PROGRAM")
+    if [ "$RUNNING" != "" ]; then 
+        echo "1"
+    fi
+}
+
+
+SCRIPT=$1
+shift
+source $SCRIPT

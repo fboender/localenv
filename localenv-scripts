@@ -82,7 +82,7 @@ for SCRIPT in `ls "$SCR_PATH/$PROFILE/scripts/" | sort -n`; do
 			echo "Would have run $RSCRIPT"
 		else
             msg -n "Running $RSCRIPT. "
-			$RSCRIPT
+			localenv-script-wrapper $RSCRIPT
             msg "Exit status: $?"
 		fi
 	fi

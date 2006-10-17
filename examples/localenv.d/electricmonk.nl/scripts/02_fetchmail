@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ ! `is_running 'fetchmail' `]; then
+    fetchmail --daemon 60&
+fi

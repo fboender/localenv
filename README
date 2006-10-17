@@ -25,6 +25,12 @@ How does it work?
 		Runs scripts in a directory [path]/[profile]/scripts/ in the correct 
 		order. See the examples/localenv.d/[profile]/scripts/ directory.
 
+    localenv-script-wrapper
+
+        localenv-scripts uses this wrapper script to run the scripts in the
+        profile directories. localenv-script-wrapper contains usefull functions
+        which can be used in scripts.
+
 	localenv-conf
 
 		Create, replace or append oonfiguration files depending on the profile.
