@@ -2,10 +2,15 @@
 #
 #  localenv-discover
 #
-#  do a bunch of stuff to try to discover on which network we are.  Echo the
-#  resulting profile name or put it in /etc/localenv.d/current_env or set an
-#  environment variable.
+#  localenv-discover tries to find a localend.d configuration file somewhere.
+#  If it does, it will ping each IP in the configuration file and see (using 
+#  the arp table lookup) of the pinged host has a particular MAC address. If 
+#  the hosts mac address matches the one in the configuration file, 
+#  localenv-discover will print that profile's name to stdout.
 #
+#  If you want to find out a hosts MAC address, just ping the host and then
+#  do run the 'arp -a -n' command. The MAC address will be listed there if
+#  the host responded to the ping.
 #
 
 function usage() {
@@ -19,13 +24,13 @@ function usage() {
 }
 
 function msg() {
-	if [ "$FLAG_VERBOSE" ]; then
-		echo $*
+	if [ -n "$FLAG_VERBOSE" ]; then
+		echo "$*" >&2
 	fi
 }
 
 function handle_cmdline() {
-	TEMP=`getopt -o hc: --long config:,help -n 'localenv-discover' -- "$@"`
+	TEMP=`getopt -o hcv: --long config:,help,verbose -n 'localenv-discover' -- "$@"`
 
 	if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -33,9 +38,10 @@ function handle_cmdline() {
 
 	while true ; do
 		case "$1" in
-			-c|--config)   CONFIG=$2;      shift 2 ;;
-			-h|--help)     FLAG_HELP=1;    shift 1 ;;
-			--)                            shift 1; break ;;
+			-c|--config)   CONFIG=$2;       shift 2 ;;
+			-v|--verbose)  FLAG_VERBOSE=$1; shift 1 ;;
+			-h|--help)     FLAG_HELP=1;     shift 1 ;;
+			--)                             shift 1; break ;;
 			*)             echo "Internal error!" ; exit 1 ;;
 		esac
 	done
@@ -60,7 +66,7 @@ function get_config() {
 		msg "Using config './backup.conf'."
 		echo "./localenv.conf"
 	elif [ -r "/etc/localenv.d/localenv.conf" ]; then 
-		msg "Using config '/etc/localevn.d/localenv.conf'."
+		msg "Using config '/etc/localenv.d/localenv.conf'."
 		echo "/etc/localenv.d/localenv.conf"
 	elif [ -r "/etc/localenv.conf" ]; then
 		msg "Using config '/etc/localenv.conf'."
@@ -77,11 +83,15 @@ CONFIG=`get_config`
 PROFILE=$(
 cat $CONFIG | grep -v "#" | grep -vx "" | while read PROFILE_NAME IP_ADDR MAC_ADDR; do
 	# Find the MAC address by pinging the host and then checking the ARP table.
-	ping -c1 $IP_ADDR >/dev/null
+	msg "Trying IP: $IP_ADDR"
+	ping -c1 -W1 $IP_ADDR >/dev/null
 	M=`/usr/sbin/arp -a -n | grep "($IP_ADDR)" | cut -d" " -f4`
+	msg "Mac address = $M"
 
 	if [ "$MAC_ADDR" == "$M" ]; then
+		msg "Found a match for $PROFILE_NAME: $IP_ADDR has Mac address $M"
 		echo $PROFILE_NAME
+		exit
 	fi
 done
 )
