@@ -6,12 +6,12 @@ localenv
 
 How does it work?
 
-	localenv-init.d
+    localenv-init.d
 
         init.d script that runs the scripts and configs in /etc/localenv.d/
         upon system boot.
 
-	localenv-discover
+    localenv-discover
 
         Discovers which network you're on by comparing the MAC address of
         certain hosts on the network. See examples/localenv.d/localenv.conf for
@@ -20,10 +20,10 @@ How does it work?
         below on how to figure out the MAC addresses of machines on your
         network.
 
-	localenv-scripts
+    localenv-scripts
 
-		Runs scripts in a directory [path]/[profile]/scripts/ in the correct 
-		order. See the examples/localenv.d/[profile]/scripts/ directory.
+        Runs scripts in a directory [path]/[profile]/scripts/ in the correct 
+        order. See the examples/localenv.d/[profile]/scripts/ directory.
 
     localenv-script-wrapper
 
@@ -31,16 +31,26 @@ How does it work?
         profile directories. localenv-script-wrapper contains usefull functions
         which can be used in scripts.
 
-	localenv-conf
+    localenv-conf
 
-		Create, replace or append oonfiguration files depending on the profile.
-		Reads all the files in [path]/[profile]/confs. Each file should be up
-		like:
+        Create, replace or append oonfiguration files depending on the profile.
+        Reads all the files in [path]/[profile]/confs. Each file should be up
+        like:
 
-		dest=/path/to/conf/to/replace
-		mode=overwrite (or) mode=append
-		--
-		REAL CONFIG CONTENTS
+        dest=/path/to/conf/to/replace
+        mode=overwrite (or) mode=append
+        --
+        REAL CONFIG CONTENTS
+
+    localenv-run
+
+        Simple wrapper script that detects the network and runs
+        localenv-scripts. This is the same as running:
+
+        localenv-scripts `localenv-discover` PATH
+
+        localenv-run also works for when you can't use backticks or other shell
+        expansions.
 
 Installation
 
@@ -79,10 +89,10 @@ Configuration
         with a special header which will be parsed by localenv-confs. The files
         should look like this:
 
-		dest=/path/to/conf/to/replace
-		mode=overwrite (or) mode=append
-		--
-		REAL CONFIG CONTENTS
+        dest=/path/to/conf/to/replace
+        mode=overwrite (or) mode=append
+        --
+        REAL CONFIG CONTENTS
 
         Configuration files can be prepended with a number to specify the order
         in which they should be run: 00_first  01_second

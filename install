@@ -4,6 +4,8 @@ echo "Installing binaries to /usr/bin/"
 cp -v -a localenv-confs /usr/bin/
 cp -v -a localenv-discover /usr/bin/
 cp -v -a localenv-scripts /usr/bin/
+cp -v -a localenv-script-wrapper /usr/bin/
+cp -v -a localenv-run /usr/bin/
 
 if [ -e "/etc/localenv.d" ]; then
     echo "You already have a localenv.d in /etc/. I won't copy the skeleton."
@@ -16,5 +18,7 @@ echo "Setting ownership and permissions on files"
 chown -R root:root /usr/bin/localenv-confs
 chown -R root:root /usr/bin/localenv-discover
 chown -R root:root /usr/bin/localenv-scripts
+chown -R root:root /usr/bin/localenv-script-wrapper
+chown -R root:root /usr/bin/localenv-run
 chown -R root:root /etc/localenv.d 
 

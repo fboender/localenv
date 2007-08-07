@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+#  localenv-run
+#
+#  Simple wrapper script which discovers the network and calls localenv-scripts
+#  with a certain directory.
+#
+
+function usage() {
+	echo "Usage: $0 DIR"
+	echo "Discover the network and run localenv-scripts NETWORK DIR"
+	echo
+	echo "Options:"
+    echo "  None"
+	echo
+}
+
+function msg() {
+	if [ -n "$FLAG_VERBOSE" ]; then
+		echo "$*" >&2
+	fi
+}
+
+function handle_cmdline() {
+	TEMP=`getopt -o hcv: --long config:,help,verbose -n 'localenv-run' -- "$@"`
+
+	if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+	eval set -- "$TEMP"
+
+	while true ; do
+		case "$1" in
+			-v|--verbose)  FLAG_VERBOSE=$1; shift 1 ;;
+			-h|--help)     FLAG_HELP=1;     shift 1 ;;
+			--)                             shift 1; break ;;
+			*)             echo "Internal error!" ; exit 1 ;;
+		esac
+	done
+
+	if [ $# -ne 1 ]; then
+		FLAG_HELP=1
+	fi
+
+	if [ "$FLAG_HELP" ]; then
+		usage
+		exit
+	fi
+
+	SCR_PATH=$1
+	if [ ! "$SCR_PATH" ]; then
+		usage
+		exit
+	fi
+}
+
+
+handle_cmdline $*
+PROFILE=`localenv-discover`
+localenv-scripts $PROFILE $SCR_PATH
