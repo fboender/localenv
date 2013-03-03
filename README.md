@@ -25,16 +25,6 @@ Some examples include:
 localenv is made up by a bunch of different scripts:
 
 
-*   **Q**: Why doesn't Tvtgrab support seeding?
-        
-    **A**: Although some clients try to automate seeding, I view seeding as a
-    manual operation; something that isn't well suited to include in an automated
-    grabber. Seeding introduces a whole range of new problems, such as how
-    long to seed, etc. Other than that, seeding single episodes is usually rather
-    pointless, especially when doing it over a sucky ADSL connection, which just
-    so happens to be the place where I watch shows. Yet another reason is that
-    seeding is considered illegal in my country, while downloading is not.
-
 *   `localenv-init.d`
 
     init.d script that runs the scripts and configs in /etc/localenv.d/
